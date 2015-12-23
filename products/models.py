@@ -16,6 +16,8 @@ class Product(models.Model):
 	geolocation = Seller(pk=seller).address
 	price = models.IntegerField(default=0)
 	sold = models.BooleanField(default=False)
+	# The following field will be useful in an application with real buyers
+	#purchased_by = models.ForeignKey(User)
 	description = models.TextField(max_length=1000)
 	created = models.DateTimeField('date created')
 
