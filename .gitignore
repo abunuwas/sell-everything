@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+
+*.docx
+
+*.sqlite3
+
+*.json
+
+*keys.py
+
+migrations/
