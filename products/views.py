@@ -1,51 +1,93 @@
 from django.shortcuts import render
 from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.contrib.auth import authenticate, login
+#from django.template import RequestContext
+
+from .models import Seller, Product
+from .forms import UserForm, SellerForm, LoginForm
 
 def index(request):
-	return HttpResponse("Hello, world. You're at the polls index")
+	products_list = Product.objects.order_by('-created')[:5]
+	context = {'products_list': products_list}
+	return render(request, 'products/index.html', context)
 
 def filterProducts(request, productFilter):
 	response = "You're at products which belong to the %s category."
 	return HttpResponse(response % productFilter)
 
 def detailProduct(request, product_id):
-	return HttpResponse("You've purchased product %s" % product_id)
+	return HttpResponse("You've viewing the details of product %s" % product_id)
 
 def buyProduct(request, product_id):
 	return HttpResponse("You've purchased product %s" % product_id)
 
 def register(request):
+	#context = RequestContext(request)
+	registered = False
+
 	if request.method == 'POST':
-		formset = SellerFormSet(request.POST)
-		if formset.is_valid():
-			cd = formset.cleaned_data
-			name = cd.name
-			address = cd.address
-			email = cd.email
-			pwd = cd.password
-			# create Seller object
-			# save Seller object
+		user_form = UserForm(data=request.POST)
+		seller_form = SellerForm(data=request.POST)
+		if user_form.is_valid() and seller_form.is_valid():
+			user = user_form.save()
+			user.set_password(user.password) #hashes the password with the set_password method
+			user.save()
+			seller = seller_form.save()
+			seller.user = user
+			registered = True
+			firstName = user.first_name
+			return render(request, '/products/loggedin/', {'first_name': first_name})
 		else:
+			# Return the bound form pointing to the errors
 			pass
-	return HttpResponse("You're in the register page.")
+	else:
+		user_form = UserForm()
+		seller_form = SellerForm()
+	return render(request, 'products/registration.html', 
+		           {'user_form': user_form, 'seller_form': seller_form, 'registered': registered}
+		           )
 
 def logIn(request):
+	#context = RequestContext(request)
 	if request.method == 'POST':
-		formset = SellerFormSet(request.POST)
-		if formset.is_valid():
-			cd = formset.cleaned_data
-			name = cd.name
-			address = cd.address
-			email = cd.email
-			pwd = cd.password
+		seller_form = LoginForm(data=request.POST)
+		if seller_form.is_valid():
+			cd = seller_form.cleaned_data
+			username = cd['username']
+			pwd = cd['password']
+			seller = authenticate(username=username, password=pwd)
+			print('seller is ', seller)
+			if seller is not None:
+				print('We have seller')
+				if seller.is_active:
+					print('Account is active')
+					login(request, seller)
+					firstName = seller.first_name
+					return render(request, 'products/loggedin.html', {'first_name': firstName})
+				else:
+					print('Account is inactive')
+					# Write later something more touchy here 
+					return HttpResponse("Your Seller account has been disabled")
+			else:
+				print('Something went wrong with the input data')
+				print(request.POST['username'], request.POST['password'])
+				return render(request, 'products/login.html', 
+					          {'seller_form': seller_form, 'error_message': "username or password wrong"}
+					          )
 		else:
-			return HttpResponseRedirect('products/loggedin/')
-    # Show a view with the list of items uploaded by hte user and two options: 
-    # list unsold or sold items and add items 
-	else: return HttpResponse("You're in the login page!")
+			print('Something went really wrong with the input data')
+			return render(request, 'products/login.html', 
+				           {'error_message': "Please introduce valid data"}
+				           )
+	else: 
+		print('Did not get anything')
+		seller_form = LoginForm()
+	return render(request, 'products/login.html', 
+		           {'seller_form': seller_form})
 
-def loggedIn(request):
-	return HttpResponse("Hi %s!" % 'joe')
+
+def loggedIn(request, user):
+	return render(request, 'products/loggedin.html', {'first_name': user})
 
 def filterSellerItems(request, option):
 	if option == 'sold':
