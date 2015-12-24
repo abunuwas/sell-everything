@@ -1,0 +1,8 @@
+<h1>Join the single best selling platform!</h1>
+
+<form id="user_form" method="post" action="{% url 'products:register' %}" encrypte="multipart/form-data">
+	{% csrf_token %}
+	{{ user_form.as_p }}
+	{{ seller_form.as_p }}
+	<input type="submit" name="submit" value="Register" />
+</form>

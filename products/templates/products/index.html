@@ -1,0 +1,12 @@
+{% if products_list %}
+    <ul>
+        {% for product in products_list %}
+            <li><a href="{% url 'products:detailProduct' product.id %}">{{ product.title }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No products yet available. Would you like to <a href="{% url 'products:logIn' %}">sell</a> something??</p>
+{% endif %}
+
+<p><a href="{% url 'products:register' %}">Become a Seller!</a></p>
+<p><a href="{% url 'products:logIn' %}">Sell!</a></p>

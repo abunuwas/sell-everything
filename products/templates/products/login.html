@@ -1,0 +1,13 @@
+<h1>Log in</h1>
+
+<form id="login_form" method="post" action="{% url 'products:logIn' %}">
+	{% csrf_token %}
+	<!--
+	Email: <input type="text" name="username" value="seller@seller.com" size="50" />
+	Password: <input type="password" name="password" value="" size="50" />
+	<br />
+	-->
+	{{ seller_form.as_p }}
+
+	<input type="submit" value="submit" />
+</form>
