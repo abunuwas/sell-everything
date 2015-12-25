@@ -36,7 +36,7 @@ def register(request):
 			seller.user = user
 			registered = True
 			firstName = user.first_name
-			return render(request, '/products/loggedin/', {'first_name': first_name})
+			return render(request, 'products/loggedin.html', {'first_name': firstName})
 		else:
 			# Return the bound form pointing to the errors
 			pass
