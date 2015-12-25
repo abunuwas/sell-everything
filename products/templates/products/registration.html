@@ -1,8 +1,55 @@
 <h1>Join the single best selling platform!</h1>
 
 <form id="user_form" method="post" action="{% url 'products:register' %}" encrypte="multipart/form-data">
-	{% csrf_token %}
-	{{ user_form.as_p }}
-	{{ seller_form.as_p }}
+    {% csrf_token %}
+	{{ user_form.non_field_errors }}
+	{{ seller_form.non_field_errors }}
+	<div class="fieldWrapper">
+		{{ user_form.first_name.errors }}
+		<label for="{{ user_form.first_name.id_for_label }}">First name:</label>
+		{{ user_form.first_name }}
+	</div>
+	<br />
+	<div class="fieldWrapper">
+		{{ user_form.last_name.errors }}
+		<label for="{{ user_form.last_name.id_for_label }}">Last name:</label>
+		{{ user_form.last_name }}
+	</div>
+	<br />
+	<div class="fieldWrapper">
+		{{ user_form.username.errors }}
+		<label for="{{ user_form.username.id_for_label }}">Username:</label>
+		{{ user_form.username }}
+	</div>
+	<br />
+	<div class="fieldWrapper">
+		{{ user_form.email.errors }}
+		<label for="{{ user_form.email.id_for_label }}">E-mail:</label>
+		{{ user_form.email }}
+	</div>
+	<br />
+	<div>
+		<label for="confirm_email">Confirm e-mail:</label>
+		<input id="confirm_email" maxlength="254" name="confirm_email" type="email">
+	</div>
+	<br />
+	<div class="fieldWrapper">
+		{{ seller_form.address.errors }}
+		<label for="{{ seller_form.address.id_for_label }}">Address:</label>
+		{{ seller_form.address }}
+	</div>
+	<br />
+	<div class="fieldWrapper">
+		{{ user_form.password.errors }}
+		<label for="{{ user_form.password.id_for_label }}">Password:</label>
+		{{ user_form.password }}
+	</div>	
+	<br />
+	<div class="fieldWrapper">
+	    {{ confirm_password.errors }}
+		<label for="confirm_password">Confirm password:</label>
+		<input id="confirm_password" name="confirm_password" type="password">
+	</div>
+	<br />
 	<input type="submit" name="submit" value="Register" />
 </form>

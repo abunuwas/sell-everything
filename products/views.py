@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 #from django.template import RequestContext
@@ -35,11 +35,14 @@ def register(request):
 			seller = seller_form.save()
 			seller.user = user
 			registered = True
-			firstName = user.first_name
+			#seller = authenticate(username=user.username, password=user.password)
+			#print(seller, ' for %s and %s' % (user.username, user.password))
+			#login(request, seller)
+			if user.first_name:
+				firstName = user.first_name
+			else:
+				firstName = user.username
 			return render(request, 'products/loggedin.html', {'first_name': firstName})
-		else:
-			# Return the bound form pointing to the errors
-			pass
 	else:
 		user_form = UserForm()
 		seller_form = SellerForm()
@@ -62,7 +65,10 @@ def logIn(request):
 				if seller.is_active:
 					print('Account is active')
 					login(request, seller)
-					firstName = seller.first_name
+					if seller.first_name:
+						firstName = seller.first_name
+					else:
+						firstName = seller.username
 					return render(request, 'products/loggedin.html', {'first_name': firstName})
 				else:
 					print('Account is inactive')
@@ -86,7 +92,7 @@ def logIn(request):
 		           {'seller_form': seller_form})
 
 
-def loggedIn(request, user):
+def loggedIn(request, user=None):
 	return render(request, 'products/loggedin.html', {'first_name': user})
 
 def filterSellerItems(request, option):
