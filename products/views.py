@@ -1,15 +1,19 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.auth import authenticate, login
+from django.views import generic
 #from django.template import RequestContext
 
 from .models import Seller, Product
 from .forms import UserForm, SellerForm, LoginForm
 
-def index(request):
-	products_list = Product.objects.order_by('-created')[:5]
-	context = {'products_list': products_list}
-	return render(request, 'products/index.html', context)
+class IndexView(generic.ListView):
+	template_name = 'products/index.html'
+	context_object_name = 'products_list'
+
+	def get_queryset(self):
+		return Product.objects.order_by('-created')[:5]
 
 def filterProducts(request, productFilter):
 	response = "You're at products which belong to the %s category."
