@@ -97,48 +97,6 @@ class Login(generic.View):
 							)
 
 
-
-def logIn(request):
-	#context = RequestContext(request)
-	if request.method == 'POST':
-		seller_form = LoginForm(data=request.POST)
-		if seller_form.is_valid():
-			cd = seller_form.cleaned_data
-			username = cd['username']
-			pwd = cd['password']
-			seller = authenticate(username=username, password=pwd)
-			print('seller is ', seller)
-			if seller is not None:
-				print('We have seller')
-				if seller.is_active:
-					print('Account is active')
-					login(request, seller)
-					if seller.first_name:
-						firstName = seller.first_name
-					else:
-						firstName = seller.username
-					return render(request, 'products/loggedin.html', {'first_name': firstName})
-				else:
-					print('Account is inactive')
-					# Write later something more touchy here 
-					return HttpResponse("Your Seller account has been disabled")
-			else:
-				print('Something went wrong with the input data')
-				print(request.POST['username'], request.POST['password'])
-				return render(request, 'products/login.html', 
-					          {'seller_form': seller_form, 'error_message': "username or password wrong"}
-					          )
-		else:
-			print('Something went really wrong with the input data')
-			return render(request, 'products/login.html', 
-				           {'error_message': "Please introduce valid data"}
-				           )
-	else: 
-		print('Did not get anything')
-		seller_form = LoginForm()
-	return render(request, 'products/login.html', 
-		           {'seller_form': seller_form})
-
 @login_required(login_url='/products/login')
 def loggedIn(request, user=None):
 	return render(request, 'products/loggedin.html', {'first_name': user})
