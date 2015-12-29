@@ -10,7 +10,7 @@ class Seller(models.Model):
 	address = models.CharField(max_length=100)
 
 	def __str__(self):
-		return self.user.email
+		return self.user.username
 
 class Product(models.Model):
 	seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
