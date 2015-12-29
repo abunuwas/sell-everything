@@ -1,3 +1,15 @@
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+
+{% if next %}
+	{% if user.is_authenticated %}
+		<p>Your account doesn't have access to this page. To proceed, please login with an account that has access.</p>
+	{% else %}
+		<p>Please login to see this page.</p>
+	{% endif %}
+{% endif %}
+
 <h1>Log in</h1>
 
 <form id="login_form" method="post" action="{% url 'products:logIn' %}">
@@ -7,7 +19,21 @@
 	Password: <input type="password" name="password" value="" size="50" />
 	<br />
 	-->
+
+	<!--
 	{{ seller_form.as_p }}
+	-->
+	<table>
+		<tr>
+			<td>{{ seller_form.username.label_tag }}</td>
+			<td>{{ seller_form.username }}</td>
+		</tr>
+		<tr>
+			<td>{{ seller_form.password.label_tag }}</td>
+			<td>{{ seller_form.password }}</td>
+		</tr>
+	</table>
+	
 
 	<input type="submit" value="submit" />
 </form>

@@ -4,6 +4,8 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.views import generic
+from django.utils.decorators import method_decorator 
+from django.contrib.auth.mixins import LoginRequiredMixin
 #from django.template import RequestContext
 
 from .models import Seller, Product
@@ -47,7 +49,7 @@ def register(request):
 				firstName = user.first_name
 			else:
 				firstName = user.username
-			return render(request, 'products/loggedin.html', {'first_name': firstName})
+			return redirect('products:loggedIn', user=user)
 	else:
 		user_form = UserForm()
 		seller_form = SellerForm()
@@ -79,7 +81,7 @@ class Login(generic.View):
 						firstName = seller.first_name
 					else:
 						firstName = seller.username
-					return render(request, 'products/loggedin.html', {'first_name': firstName})
+					return redirect('products:loggedIn', user=user)
 				else:
 					print('Accunt is inactive')
 					# Write later something more touchy here
@@ -97,11 +99,34 @@ class Login(generic.View):
 							)
 
 
-@login_required(login_url='/products/login')
-def loggedIn(request, user=None):
-	return render(request, 'products/loggedin.html', {'first_name': user})
+class LoggedIn(LoginRequiredMixin, generic.View):
+	login_url = "/products/login/"
+	redirect_field_name = 'redirect_to'
+	template_name = 'products/loggedin.html'
 
-@login_required(login_url='/products/login')
+	def get(self, request, user=None):
+		print(request)
+		print(request.user)
+		print('We are in LoggedIn with get method')
+		return render(request, 'products/loggedin.html', {'first_name': user})
+
+	@method_decorator(login_required)
+	def dispatch(self, *args, **kwargs):
+		return super(LoggedIn, self).dispatch(*args, **kwargs)
+
+
+#@login_required(login_url='/products/login/')
+def loggedIn(request, user=None):
+	print('We are in loggedIn')
+	print(request)
+	print(user)
+	if user.first_name:
+		firstName = user.first_name
+	else:
+		firstName = user.username
+	return render(request, 'products/loggedin.html', {'first_name': firstName})
+
+@login_required
 def filterSellerItems(request, option):
 	if option == 'sold':
 	    return

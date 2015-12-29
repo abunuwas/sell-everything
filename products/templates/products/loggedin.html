@@ -1,5 +1,5 @@
-{% if first_name %}
-	<h1>Welcome {{ first_name }}!</h1>
+{% if user.is_active %}
+	<h1>Welcome {{ user.username }}!</h1>
 {% else %}
     <h1>Hmmm... it doesn't look like you should be here....</h1>
  {% endif %}
