@@ -67,3 +67,148 @@ Regardless of the value of the DEBUG setting in your configuration file, all Dja
 
 Use in-browser frameworks like Selenium to test rendered HTML and the behavior of Web pages, namely JavaScript functionality. Django also provides special support for those frameworks; see the section on LiveServerTestCase for more details.
 
+Note a few important things about how the test client works:
+
+The test client does not require the Web server to be running. In fact, it will run just fine with no Web server running at all! That’s because it avoids the overhead of HTTP and deals directly with the Django framework. This helps make the unit tests run quickly.
+
+When retrieving pages, remember to specify the path of the URL, not the whole domain. For example, this is correct:
+
+>>> c.get('/login/')
+This is incorrect:
+
+>>> c.get('https://www.example.com/login/')
+
+Although the above example would work in the Python interactive interpreter, some of the test client’s functionality, notably the template-related functionality, is only available while tests are running.
+
+The reason for this is that Django’s test runner performs a bit of black magic in order to determine which template was loaded by a given view. This black magic (essentially a patching of Django’s template system in memory) only happens during test running.
+
+By default, the test client will disable any CSRF checks performed by your site.
+
+If, for some reason, you want the test client to perform CSRF checks, you can create an instance of the test client that enforces CSRF checks. To do this, pass in the enforce_csrf_checks argument when you construct your client:
+
+>>> from django.test import Client
+>>> csrf_client = Client(enforce_csrf_checks=True)
+
+Making requests
+
+Use the django.test.Client class to make requests.
+
+class Client(enforce_csrf_checks=False, **defaults)[source]
+It requires no arguments at time of construction. However, you can use keywords arguments to specify some default headers. For example, this will send a User-Agent HTTP header in each request:
+
+>>> c = Client(HTTP_USER_AGENT='Mozilla/5.0')
+
+Once you have a Client instance, you can call any of the following methods:
+
+get(path, data=None, follow=False, secure=False, **extra)[source]
+Makes a GET request on the provided path and returns a Response object, which is documented below.
+
+The key-value pairs in the data dictionary are used to create a GET data payload. For example:
+
+>>> c = Client()
+>>> c.get('/customers/details/', {'name': 'fred', 'age': 7})
+...will result in the evaluation of a GET request equivalent to:
+
+/customers/details/?name=fred&age=7
+The extra keyword arguments parameter can be used to specify headers to be sent in the request. For example:
+
+>>> c = Client()
+>>> c.get('/customers/details/', {'name': 'fred', 'age': 7},
+...       HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+...will send the HTTP header HTTP_X_REQUESTED_WITH to the details view, which is a good way to test code paths that use the django.http.HttpRequest.is_ajax() method.
+
+If you already have the GET arguments in URL-encoded form, you can use that encoding instead of using the data argument. For example, the previous GET request could also be posed as:
+
+>>> c = Client()
+>>> c.get('/customers/details/?name=fred&age=7')
+
+CGI specification
+The headers sent via **extra should follow CGI specification. For example, emulating a different “Host” header as sent in the HTTP request from the browser to the server should be passed as HTTP_HOST.
+
+If you set follow to True the client will follow any redirects and a redirect_chain attribute will be set in the response object containing tuples of the intermediate urls and status codes.
+
+If you had a URL /redirect_me/ that redirected to /next/, that redirected to /final/, this is what you’d see:
+
+>>> response = c.get('/redirect_me/', follow=True)
+>>> response.redirect_chain
+[('http://testserver/next/', 302), ('http://testserver/final/', 302)]
+If you set secure to True the client will emulate an HTTPS request.
+
+post(path, data=None, content_type=MULTIPART_CONTENT, follow=False, secure=False, **extra)[source]
+Makes a POST request on the provided path and returns a Response object, which is documented below.
+
+The key-value pairs in the data dictionary are used to submit POST data. For example:
+
+>>> c = Client()
+>>> c.post('/login/', {'name': 'fred', 'passwd': 'secret'})
+...will result in the evaluation of a POST request to this URL:
+
+/login/
+...with this POST data:
+
+name=fred&passwd=secret
+If you provide content_type (e.g. text/xml for an XML payload), the contents of data will be sent as-is in the POST request, using content_type in the HTTP Content-Type header.
+
+To submit multiple values for a given key – for example, to specify the selections for a <select multiple> – provide the values as a list or tuple for the required key. For example, this value of data would submit three selected values for the field named choices:
+
+{'choices': ('a', 'b', 'd')}
+Submitting files is a special case. To POST a file, you need only provide the file field name as a key, and a file handle to the file you wish to upload as a value. For example:
+
+>>> c = Client()
+>>> with open('wishlist.doc') as fp:
+...     c.post('/customers/wishes/', {'name': 'fred', 'attachment': fp})
+(The name attachment here is not relevant; use whatever name your file-processing code expects.)
+
+You should also ensure that the file is opened in a way that allows the data to be read. If your file contains binary data such as an image, this means you will need to open the file in rb (read binary) mode.
+
+If the URL you request with a POST contains encoded parameters, these parameters will be made available in the request.GET data. For example, if you were to make the request:
+
+>>> c.post('/login/?visitor=true', {'name': 'fred', 'passwd': 'secret'})
+... the view handling this request could interrogate request.POST to retrieve the username and password, and could interrogate request.GET to determine if the user was a visitor.
+
+If you set follow to True the client will follow any redirects and a redirect_chain attribute will be set in the response object containing tuples of the intermediate urls and status codes.
+
+If you set secure to True the client will emulate an HTTPS request.
+
+options(path, data='', content_type='application/octet-stream', follow=False, secure=False, **extra)[source]
+Makes an OPTIONS request on the provided path and returns a Response object. Useful for testing RESTful interfaces.
+
+When data is provided, it is used as the request body, and a Content-Type header is set to content_type.
+
+The follow, secure and extra arguments act the same as for Client.get().
+
+put(path, data='', content_type='application/octet-stream', follow=False, secure=False, **extra)[source]
+Makes a PUT request on the provided path and returns a Response object. Useful for testing RESTful interfaces.
+
+When data is provided, it is used as the request body, and a Content-Type header is set to content_type.
+
+The follow, secure and extra arguments act the same as for Client.get().
+
+patch(path, data='', content_type='application/octet-stream', follow=False, secure=False, **extra)[source]
+Makes a PATCH request on the provided path and returns a Response object. Useful for testing RESTful interfaces.
+
+The follow, secure and extra arguments act the same as for Client.get().
+
+delete(path, data='', content_type='application/octet-stream', follow=False, secure=False, **extra)[source]
+Makes an DELETE request on the provided path and returns a Response object. Useful for testing RESTful interfaces.
+
+When data is provided, it is used as the request body, and a Content-Type header is set to content_type.
+
+The follow, secure and extra arguments act the same as for Client.get().
+
+login(**credentials)[source]
+If your site uses Django’s authentication system and you deal with logging in users, you can use the test client’s login() method to simulate the effect of a user logging into the site.
+
+Inactive users (is_active=False) are not permitted to login as this method is meant to be equivalent to the login() view which uses AuthenticationForm and therefore defaults to rejecting users who are inactive.
+
+After you call this method, the test client will have all the cookies and session data required to pass any login-based tests that may form part of a view.
+
+The format of the credentials argument depends on which authentication backend you’re using (which is configured by your AUTHENTICATION_BACKENDS setting). If you’re using the standard authentication backend provided by Django (ModelBackend), credentials should be the user’s username and password, provided as keyword arguments:
+
+>>> c = Client()
+>>> c.login(username='fred', password='secret')
+
+# Now you can access a view that's only available to logged-in users.
+
+login() returns True if it the credentials were accepted and login was successful.
+
