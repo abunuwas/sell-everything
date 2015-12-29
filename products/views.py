@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.views import generic
 #from django.template import RequestContext
 
@@ -54,6 +55,49 @@ def register(request):
 		           {'user_form': user_form, 'seller_form': seller_form, 'registered': registered}
 		           )
 
+class Login(generic.View):
+	seller_form = LoginForm
+	template_name = 'products/login.html'
+
+	def get(self, request, *args, **kwargs):
+		seller_form = self.seller_form()
+		return render(request, self.template_name, {'seller_form': seller_form})
+
+	def post(self, request, *args, **kwargs):
+		seller_form = self.seller_form(data=request.POST)
+		if seller_form.is_valid():
+			cd = seller_form.cleaned_data
+			username = cd['username']
+			pwd = cd['password']
+			seller = authenticate(username=username, password=pwd)
+			print('seller is ', seller)
+			if seller is not None:
+				if seller.is_active:
+					print('Account is active')
+					login(request, seller)
+					if seller.first_name:
+						firstName = seller.first_name
+					else:
+						firstName = seller.username
+					return render(request, 'products/loggedin.html', {'first_name': firstName})
+				else:
+					print('Accunt is inactive')
+					# Write later something more touchy here
+					return HttpResponse("Your seller account has been disabled")
+			else:
+				print('Something went wrong with the input data, seller is None')
+				print(request.POST['username'], requsest.POST['set_password'])
+				return render(request, 'products/login.html', 
+								{'seller_form': seller_form, 'error_message': "username or password wrong"}
+								)
+		else:
+			print('Something went really wrong with the input data, data is invalid')
+			return render(request, 'products/login.html', 
+							{'error_message': "Please introduce valid data"} 
+							)
+
+
+
 def logIn(request):
 	#context = RequestContext(request)
 	if request.method == 'POST':
@@ -95,10 +139,11 @@ def logIn(request):
 	return render(request, 'products/login.html', 
 		           {'seller_form': seller_form})
 
-
+@login_required(login_url='/products/login')
 def loggedIn(request, user=None):
 	return render(request, 'products/loggedin.html', {'first_name': user})
 
+@login_required(login_url='/products/login')
 def filterSellerItems(request, option):
 	if option == 'sold':
 	    return
