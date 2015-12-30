@@ -157,7 +157,7 @@ class AddProduct(LoginRequiredMixin, generic.View):
 			product.seller = seller
 			product.geolocation = seller.address
 			product.save()
-			return render(request, 'products/loggedin.html')
+			return redirect('/products/loggedin/')
 		else: return render(request, 
 							template_name, 
 							{'product_form': product_form, 
