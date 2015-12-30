@@ -1,0 +1,35 @@
+<h1>Sell a brand new product!</h1>
+
+{% if form.errors %}
+<p>Please introduce valid data.</p>
+{{ form.errors }}
+{% endif %}
+
+{% if error_message %}
+	<p>{{ error_message }}</p>
+{% endif %}
+
+<form id="product_form" method="post" action="{% url 'products:addProduct' %}">
+	{% csrf_token %}
+	<table>
+		<tr>
+			<td>{{ product_form.title.label_tag }}</td>
+			<td>{{ product_form.title }}</td>
+		</tr>
+		<tr>
+			<td>{{ product_form.category.label_tag }}</td>
+			<td>{{ product_form.category }}</td>
+		</tr>
+		<tr>
+			<td>{{ product_form.price.label_tag }}</td>
+			<td>{{ product_form.price }}</td>
+		</tr>
+		<tr>
+			<td>{{ product_form.description.label_tag }}</td>
+			<td>{{ product_form.description }}</td>
+		</tr>
+	</table>
+	
+
+	<input type="submit" value="submit" />
+</form>

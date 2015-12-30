@@ -6,10 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.views import generic
 from django.utils.decorators import method_decorator 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils import timezone
 #from django.template import RequestContext
 
 from .models import Seller, Product
-from .forms import UserForm, SellerForm, LoginForm
+from .forms import UserForm, SellerForm, LoginForm, ProductForm
 
 
 class IndexView(generic.ListView):
@@ -79,7 +80,7 @@ class Login(generic.View):
 					print('Account is active')
 					login(request, seller)
 					print(seller.username)
-					return redirect('/products/loggedin/', user=seller)
+					return redirect('/products/loggedin/')
 				else:
 					print('Accunt is inactive')
 					# Write later something more touchy here
@@ -103,6 +104,7 @@ def logout_view(request):
 
 class LoggedIn(LoginRequiredMixin, generic.View):
 	login_url = "/products/login/"
+	permission_denied_message = 'Please provide a valid username and password'
 
 	def get(self, request):
 		seller = Seller.objects.get(user=request.user)
@@ -111,9 +113,9 @@ class LoggedIn(LoginRequiredMixin, generic.View):
 															'products_list': products_list}
 															)
 
-#	@method_decorator(login_required)
-#	def dispatch(self, *args, **kwargs):
-#		return super(LoggedIn, self).dispatch(*args, **kwargs)
+	@method_decorator(login_required(login_url=login_url))
+	def dispatch(self, *args, **kwargs):
+		return super(LoggedIn, self).dispatch(*args, **kwargs)
 
 
 @login_required(login_url='/products/login/')
@@ -137,24 +139,31 @@ def detailSellerProduct(request, product_id):
 def removeProduct(request, product_id):
 	return HttpResponse("You're going to remove item %s from your list!" % product_id)
 
-def addProduct(request):
-	# Use decorator to ensure that the user is logged in
-	# Show formset
-	if request.method == 'POST':
-		formset = SellerFormSet(request.POST)
-		if formset.is_valid():
-			cd = formset.cleaned_data
-			title = cd.title
-			category = cd.category
-			description = cd.category
-			price = cd.category
-			# seller = loggedIn
-			# geolocation = seller.address
-			# create Product object
-			# save Product object
-		else:
-			pass
-	return HttpResponse("You're in the add items page.")
+class AddProduct(LoginRequiredMixin, generic.View):
+	login_url = "/products/login/"
+	product_form = ProductForm
+	template_name = 'products/add_product.html'
+
+	def get(self, request, *args, **kwargs):
+		product_form = self.product_form()
+		return render(request, self.template_name, {'product_form': product_form})
+
+	def post(self, request, *args, **kwargs):
+		product_form = self.product_form(data=request.POST)
+		if product_form.is_valid():
+			product = product_form.save(commit=False)
+			product.created = timezone.now()
+			seller = Seller.objects.get(user=request.user)
+			product.seller = seller
+			product.geolocation = seller.address
+			product.save()
+			return render(request, 'products/loggedin.html')
+		else: return render(request, 
+							template_name, 
+							{'product_form': product_form, 
+								'error_message': 'Please introduce valid data'}
+							)
+
 
 
 

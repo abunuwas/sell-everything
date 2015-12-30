@@ -14,7 +14,7 @@ urlpatterns = [
     url(r'^login/$', views.Login.as_view(), name='logIn'),
     url(r'^logout/$', views.logout_view, name='logout'),
     url(r'^loggedin/$', views.LoggedIn.as_view(), name='loggedIn'),
-    url(r'^(?P<user>\w+)/filter/(?P<productFilter>\w+)/$', views.filterSellerItems, name='filterSellerItems'),
+    url(r'^loggedin/filter/(?P<productFilter>\w+)/$', views.filterSellerItems, name='filterSellerItems'),
     url(r'^loggedin/filter/(?P<product_id>[0-9]+)/$', views.detailSellerProduct, name='detailSellerProduct'),
-    url(r'^loggedin/addproduct/$', views.addProduct, name='addProduct'),
+    url(r'^loggedin/addproduct/$', views.AddProduct.as_view(), name='addProduct'),
     ]
