@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views import generic
 from django.utils.decorators import method_decorator 
@@ -77,11 +77,8 @@ class Login(generic.View):
 				if seller.is_active:
 					print('Account is active')
 					login(request, seller)
-					if seller.first_name:
-						firstName = seller.first_name
-					else:
-						firstName = seller.username
-					return redirect('products:loggedIn', user=user)
+					print(seller.username)
+					return redirect('/products/loggedin/', user=seller)
 				else:
 					print('Accunt is inactive')
 					# Write later something more touchy here
@@ -98,33 +95,30 @@ class Login(generic.View):
 							{'error_message': "Please introduce valid data"} 
 							)
 
+def logout_view(request):
+	logout(request)
+	return redirect('/products/')
+
 
 class LoggedIn(LoginRequiredMixin, generic.View):
 	login_url = "/products/login/"
 	redirect_field_name = 'redirect_to'
 	template_name = 'products/loggedin.html'
 
-	def get(self, request, user=None):
+	def get(self, request, user):
 		print(request)
 		print(request.user)
 		print('We are in LoggedIn with get method')
-		return render(request, 'products/loggedin.html', {'first_name': user})
+		return render(request, 'products/loggedin.html', {'first_name': request.user})
 
 	@method_decorator(login_required)
 	def dispatch(self, *args, **kwargs):
 		return super(LoggedIn, self).dispatch(*args, **kwargs)
 
 
-#@login_required(login_url='/products/login/')
+@login_required(login_url='/products/login/')
 def loggedIn(request, user=None):
-	print('We are in loggedIn')
-	print(request)
-	print(user)
-	if user.first_name:
-		firstName = user.first_name
-	else:
-		firstName = user.username
-	return render(request, 'products/loggedin.html', {'first_name': firstName})
+	return render(request, 'products/loggedin.html', {'user': request.user})
 
 @login_required
 def filterSellerItems(request, option):
