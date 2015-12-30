@@ -17,4 +17,5 @@ urlpatterns = [
     url(r'^loggedin/filter/(?P<productFilter>\w+)/$', views.filterSellerItems, name='filterSellerItems'),
     url(r'^loggedin/filter/(?P<product_id>[0-9]+)/$', views.detailSellerProduct, name='detailSellerProduct'),
     url(r'^loggedin/addproduct/$', views.AddProduct.as_view(), name='addProduct'),
+    url(r'^loggedin/remove_product/(?P<product_id>[0-9]+)$', views.removeProduct, name='removeProduct'),
     ]

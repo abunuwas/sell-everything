@@ -137,7 +137,9 @@ def detailSellerProduct(request, product_id):
 	return HttpResponse("You're looking at product %s" % product_id)
 
 def removeProduct(request, product_id):
-	return HttpResponse("You're going to remove item %s from your list!" % product_id)
+	target_product = Product.objects.get(pk=product_id)
+	target_product.delete()
+	return redirect('/products/loggedin/')
 
 class AddProduct(LoginRequiredMixin, generic.View):
 	login_url = "/products/login/"

@@ -8,7 +8,7 @@
  	<a href="{% url 'products:addProduct' %}">Add a new product!</a>
     <ul>
         {% for product in products_list %}
-            <li><a href="{% url 'products:detailProduct' product.id %}">{{ product.title }}</a></li>
+            <li><a href="{% url 'products:detailProduct' product.id %}">{{ product.title }}</a> - <a href="{% url 'products:removeProduct' product.id %}">delete</a></li>
         {% endfor %}
     </ul>
 {% else %}
