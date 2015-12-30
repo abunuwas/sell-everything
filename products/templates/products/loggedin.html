@@ -4,4 +4,15 @@
     <h1>Hmmm... it doesn't look like you should be here....</h1>
  {% endif %}
 
+ {% if products_list %}
+ 	<a href="">Add a new product!</a>
+    <ul>
+        {% for product in products_list %}
+            <li><a href="{% url 'products:detailProduct' product.id %}">{{ product.title }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You haven't yet uplpaded any product for sell! <a href="">Upload</a> one now!</p>
+{% endif %}
+
  <p><a href="{% url 'products:logout' %}">Log out</a></p>

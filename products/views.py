@@ -11,6 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Seller, Product
 from .forms import UserForm, SellerForm, LoginForm
 
+
 class IndexView(generic.ListView):
 	template_name = 'products/index.html'
 	context_object_name = 'products_list'
@@ -102,23 +103,24 @@ def logout_view(request):
 
 class LoggedIn(LoginRequiredMixin, generic.View):
 	login_url = "/products/login/"
-	redirect_field_name = 'redirect_to'
-	template_name = 'products/loggedin.html'
 
-	def get(self, request, user):
-		print(request)
-		print(request.user)
-		print('We are in LoggedIn with get method')
-		return render(request, 'products/loggedin.html', {'first_name': request.user})
+	def get(self, request):
+		seller = Seller.objects.get(user=request.user)
+		products_list = seller.product_set.all().order_by('-created')
+		return render(request, 'products/loggedin.html', {'user': request.user, 
+															'products_list': products_list}
+															)
 
-	@method_decorator(login_required)
-	def dispatch(self, *args, **kwargs):
-		return super(LoggedIn, self).dispatch(*args, **kwargs)
+#	@method_decorator(login_required)
+#	def dispatch(self, *args, **kwargs):
+#		return super(LoggedIn, self).dispatch(*args, **kwargs)
 
 
 @login_required(login_url='/products/login/')
-def loggedIn(request, user=None):
-	return render(request, 'products/loggedin.html', {'user': request.user})
+def loggedIn(request):
+	seller = Seller.objects.get(username=user.username)
+	product_list = seller.product_set.all().order_by('-created')
+	return render(request, 'products/loggedin.html', {'user': request.user, 'products_list': products_list})
 
 @login_required
 def filterSellerItems(request, option):
