@@ -1,5 +1,10 @@
 {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
+{{ form.errors }}
+{% endif %}
+
+{% if error_messages %}
+	<p>{{ error_messages }}</p>
 {% endif %}
 
 {% if next %}
