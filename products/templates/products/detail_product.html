@@ -1,0 +1,36 @@
+
+<h1>{{ product.title }}</h1>
+
+	<table>
+		<tr>
+			<td>Category</td>
+			<td>{{ product.category }}</td>
+		</tr>
+		<tr>
+			<td>Price</td>
+			<td>{{ product.price }}</td>
+		</tr>
+		<tr>
+			<td>Published</td>
+			<td>{{ product.created }}</td>
+		</tr>
+		<tr>
+			<td>Available in</td>
+			<td>{{ product.seller.address }}</td>
+		</tr>
+				<tr>
+			<td>Created by</td>
+			<td>{{ product.seller }}</td>
+		</tr>
+    </table>
+
+{% if product.seller.user.username == user.username %}
+	<p><a href="{% url 'products:removeProduct' product.id %}">Delete</a> - <a href="">Edit</a></p>
+{% endif %}
+
+<p>Description</p>
+<span>{{ product.description }}</span>
+
+
+
+

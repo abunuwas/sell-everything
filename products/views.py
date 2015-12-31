@@ -24,8 +24,11 @@ def filterProducts(request, productFilter):
 	response = "You're at products which belong to the %s category."
 	return HttpResponse(response % productFilter)
 
-def detailProduct(request, product_id):
-	return HttpResponse("You've viewing the details of product %s" % product_id)
+class DetailProduct(generic.DetailView):
+
+	def get(self, request, product_id):
+		product = Product.objects.get(pk=product_id)
+		return render(request, 'products/detail_product.html', {'product': product, 'user': request.user})
 
 def buyProduct(request, product_id):
 	return HttpResponse("You've purchased product %s" % product_id)
@@ -157,7 +160,7 @@ class AddProduct(LoginRequiredMixin, generic.View):
 			product.created = timezone.now()
 			seller = Seller.objects.get(user=request.user)
 			product.seller = seller
-			product.geolocation = seller.address
+			product.geolocation = product.seller.address
 			product.save()
 			return redirect('/products/loggedin/')
 		else: return render(request, 
