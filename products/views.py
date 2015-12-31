@@ -10,18 +10,51 @@ from django.utils import timezone
 #from django.template import RequestContext
 
 from .models import Seller, Product
-from .forms import UserForm, SellerForm, LoginForm, ProductForm
+from .forms import UserForm, SellerForm, LoginForm, ProductForm, FilterForm
 
 
 class IndexView(generic.ListView):
 	template_name = 'products/index.html'
 	context_object_name = 'products_list'
+	filter_form = FilterForm
 
 	def get_queryset(self):
-		return Product.objects.order_by('-created')[:5]
+		return Product.objects.order_by('-created')
 
 	def get(self, request):
-		return render(request, 'products/index.html', {'products_list': self.get_queryset, 'user': request.user})
+		if 'query' in request.GET:
+			filters = []
+			filter_form = filter_form(request.GET)
+			if filter_form.is_valid():
+				cd = filter_form.clean_data
+				if cd['category']:
+					category = cd['category']
+				else:
+					category = None
+				if cd['price']:
+					price = cd['price']
+				else:
+					price = None
+				if cd['geolocation']:
+					geolocation = cd['geolocation']
+				else:
+					geolocation = None
+				filters.append(category)
+				filters.append(price)
+				filters.append(geolocation)
+			for filt in filters:
+				if filt is None:
+					filters.remove(filt)
+			query_set = Product.objects.get_all()
+
+		else:
+			filter_form = filter_form()
+			return render(request, 'products/index.html', {'products_list': self.get_queryset, 
+															'user': request.user, 
+															'filter_form': filter_form})
+
+		
+
 
 def filterProducts(request, productFilter):
 	response = "You're at products which belong to the %s category."

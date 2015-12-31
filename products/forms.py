@@ -27,6 +27,12 @@ class ProductForm(ModelForm):
 		model = Product
 		fields = ['title', 'category', 'price', 'description']
 
+class FilterForm(forms.Form):
+	category = forms.CharField(max_length=100, required=False)
+	price = forms.IntegerField(required=False)
+	geolocation = forms.CharField(max_length=200, required=False)
+
+
 
 
 
