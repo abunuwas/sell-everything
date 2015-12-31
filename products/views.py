@@ -20,6 +20,9 @@ class IndexView(generic.ListView):
 	def get_queryset(self):
 		return Product.objects.order_by('-created')[:5]
 
+	def get(self, request):
+		return render(request, 'products/index.html', {'products_list': self.get_queryset, 'user': request.user})
+
 def filterProducts(request, productFilter):
 	response = "You're at products which belong to the %s category."
 	return HttpResponse(response % productFilter)
