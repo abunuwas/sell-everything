@@ -22,36 +22,40 @@ class IndexView(generic.ListView):
 		return Product.objects.order_by('-created')
 
 	def get(self, request):
-		if 'query' in request.GET:
-			filters = []
-			filter_form = filter_form(request.GET)
+		print(request)
+		request_elements = [value for key, value in request.GET.items() if len(value)>0]
+		query_set = Product.objects
+		if len(request_elements)>0:
+			filter_form = self.filter_form(request.GET)
 			if filter_form.is_valid():
-				cd = filter_form.clean_data
+				cd = filter_form.cleaned_data
 				if cd['category']:
 					category = cd['category']
-				else:
-					category = None
-				if cd['price']:
-					price = cd['price']
-				else:
-					price = None
+					query_set = query_set.filter(category=category)
+				else: pass
+				if cd['min_price']:
+					min_price = cd['min_price']
+					query_set = query_set.filter(price__gt=min_price)
+				else: pass
+				if cd['max_price']:
+					max_price = cd['max_price']
+					query_set = query_set.filter(price__lt=max_price)
+				else: pass
 				if cd['geolocation']:
 					geolocation = cd['geolocation']
-				else:
-					geolocation = None
-				filters.append(category)
-				filters.append(price)
-				filters.append(geolocation)
-			for filt in filters:
-				if filt is None:
-					filters.remove(filt)
-			query_set = Product.objects.get_all()
-
+					print(geolocation)
+					query_set = query_set.filter(seller__address=geolocation)
+				else: pass
+			print(query_set)
+			return render(request, 'products/index.html', {'products_list': query_set, 
+											    			'user': request.user, 
+												    		'filter_form': filter_form})
 		else:
-			filter_form = filter_form()
-			return render(request, 'products/index.html', {'products_list': self.get_queryset, 
-															'user': request.user, 
-															'filter_form': filter_form})
+			filter_form = self.filter_form()
+			query_set = query_set.all()
+			return render(request, 'products/index.html', {'products_list': query_set, 
+											    			'user': request.user, 
+												    		'filter_form': filter_form})
 
 		
 
