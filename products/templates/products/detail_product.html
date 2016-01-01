@@ -25,7 +25,8 @@
     </table>
 
 {% if product.seller.user.username == user.username %}
-	<p><a href="{% url 'products:removeProduct' product.id %}">Delete</a> - <a href="">Edit</a></p>
+	<p><a href="{% url 'products:removeProduct' product.id %}">Delete</a> - 
+	<a href="{% url 'products:editProduct' product.id %}">Edit</a></p>
 {% endif %}
 
 <p>Description</p>

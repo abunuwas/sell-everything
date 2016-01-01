@@ -209,7 +209,31 @@ class AddProduct(LoginRequiredMixin, generic.View):
 								'error_message': 'Please introduce valid data'}
 							)
 
+class EditProduct(LoginRequiredMixin, generic.View):
+	login_url = "/products/login/"
+	product_form = ProductForm
 
+	def get(self, request, product_id):
+		product = Product.objects.get(pk=product_id)
+		product_form = self.product_form(initial={
+												'title': product.title,
+												'category': product.category,
+												'price': product.price,
+												'description': product.description
+												})
+		return render(request, 'products/edit_product.html', {'product_form': product_form})
+
+	def post(self, request, product_id):
+		product = Product.objects.get(pk=product_id)
+		product_form = self.product_form(data=request.POST)
+		if product_form.is_valid():
+			cd = product_form.cleaned_data
+			product.title = cd['title']
+			product.category = cd['category']
+			product.price = cd['price']
+			product.description = cd['description']
+		product.save()
+		return redirect('/products/product/' + product_id)
 
 
 
