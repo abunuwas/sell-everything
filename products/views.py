@@ -9,7 +9,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic.edit import FormMixin
-#from django.template import RequestContext
 
 from .models import Seller, Product
 from .forms import UserForm, SellerForm, LoginForm, ProductForm, FilterForm
@@ -61,51 +60,18 @@ class IndexView(FormMixin, generic.ListView):
 			self.paginate_by = 5
 		return self.paginate_by
 
+	def get_boundform(self):
+		filter_form = self.filter_form(self.request.GET)
+		self.form = filter_form
+		return self.form
+
 	def get(self, request):
-
-		form_class = self.get_form_class()
-		self.form = self.get_form(form_class)
-		print(self.form)
-		#form = self.form(data=request.GET)
-		#print(form)
-
+		self.form = self.get_boundform()
 		self.object_list = self.get_queryset()
 		context = self.get_context_data(object_list=self.object_list)
 		context['filter_form'] = self.form
 		print(context)
 		return render(request, self.template_name, context)
-
-	#def listing(self, request, query_set):
-	#	try:
-	#		items_per_page = int(request.GET['items_per_page'])
-	#	except KeyError:
-	#		items_per_page = 5
-
-	#	paginator = Paginator(query_set, items_per_page)
-	#	page = request.GET.get('page') 
-	#	try:
-	#		paginated_set = paginator.page(page)
-	#	except PageNotAnInteger:
-	#		paginated_set = paginator.page(1)
-	#	except EmptyPage:
-	#		paginated_set = paginator.page(paginator.num_pages)	
-	#	except:
-	#		print('Something went really worong...')
-	#		paginated_set = query_set
-
-	#	return paginated_set
-		
-
-	#def get(self, request):
-	#	query_set, filter_form = self.get_query_set(request)
-	#	#paginated_set = self.listing(request, query_set)
-	#	print(paginated_set)
-	#	return render(request, 'products/index.html', {'products_list': paginated_set, 
-	#										    			'user': request.user, 
-	#											    		'filter_form': filter_form
-	#											    		},
-	#											    		)
-
 		
 
 def filterProducts(request, productFilter):
