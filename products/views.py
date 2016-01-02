@@ -8,25 +8,27 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.views.generic.edit import FormMixin
 #from django.template import RequestContext
 
 from .models import Seller, Product
 from .forms import UserForm, SellerForm, LoginForm, ProductForm, FilterForm
 
 
-class IndexView(generic.ListView):
+class IndexView(FormMixin, generic.ListView):
 	template_name = 'products/index.html'
 	filter_form = FilterForm
-	paginate_by = 5
+	form_class = FilterForm
 	context_object_name = 'products_list'
 
-	def get_queryset(self, request):
-		request_elements = [value for key, value in request.GET.items() 
+	def get_queryset(self):
+		request_elements = [value for key, value in self.request.GET.items() 
 							if len(value)>0 
-								and key != 'items_per_page']
+								and key != 'items_per_page'
+								and key != 'page']
 		query_set = Product.objects
 		if len(request_elements)>0:
-			filter_form = self.filter_form(request.GET)
+			filter_form = self.filter_form(self.request.GET)
 			if filter_form.is_valid():
 				cd = filter_form.cleaned_data
 				if cd['category']:
@@ -43,22 +45,35 @@ class IndexView(generic.ListView):
 				else: pass
 				if cd['geolocation']:
 					geolocation = cd['geolocation']
-					print(geolocation)
 					query_set = query_set.filter(seller__address=geolocation)
 				else: pass
-				return query_set, filter_form
+				return query_set
 		else:
 			query_set = query_set.all()
 			filter_form = self.filter_form()
 			self.queryset = query_set
-			return query_set, filter_form
+			return query_set
 
-	def get_pagination(self, request):
+	def get_paginate_by(self, queryset):
 		try:
-			items_per_page = int(request.GET['items_per_page'])
+			self.paginate_by = int(self.request.GET['items_per_page'])
 		except KeyError:
-			items_per_page = 5
-		self.get_pagination=items_per_page
+			self.paginate_by = 5
+		return self.paginate_by
+
+	def get(self, request):
+
+		form_class = self.get_form_class()
+		self.form = self.get_form(form_class)
+		print(self.form)
+		#form = self.form(data=request.GET)
+		#print(form)
+
+		self.object_list = self.get_queryset()
+		context = self.get_context_data(object_list=self.object_list)
+		context['filter_form'] = self.form
+		print(context)
+		return render(request, self.template_name, context)
 
 	#def listing(self, request, query_set):
 	#	try:
@@ -81,15 +96,15 @@ class IndexView(generic.ListView):
 	#	return paginated_set
 		
 
-	def get(self, request):
-		query_set, filter_form = self.get_query_set(request)
-		#paginated_set = self.listing(request, query_set)
-		print(paginated_set)
-		return render(request, 'products/index.html', {'products_list': paginated_set, 
-											    			'user': request.user, 
-												    		'filter_form': filter_form
-												    		},
-												    		)
+	#def get(self, request):
+	#	query_set, filter_form = self.get_query_set(request)
+	#	#paginated_set = self.listing(request, query_set)
+	#	print(paginated_set)
+	#	return render(request, 'products/index.html', {'products_list': paginated_set, 
+	#										    			'user': request.user, 
+	#											    		'filter_form': filter_form
+	#											    		},
+	#											    		)
 
 		
 

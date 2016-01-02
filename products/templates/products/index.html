@@ -34,16 +34,16 @@
 
     <div>
     	<span class="step-links">
-    		{% if products_list.has_previous %}
-    			<a href="?page={{ products_list.previous_page_number }}">previous</a>
+    		{% if page_obj.has_previous %}
+    			<a href="?page={{ page_obj.previous_page_number }}">previous</a>
     		{% endif %}
 
     		<span class="current">
-    			Page {{ products_list.number }} of {{ products_list.paginator.num_pages }}.
+    			Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
     		</span>
 
-    		{% if products_list.has_next %}
-    			<a href="?page={{ products_list.next_page_number }}">next</a>
+    		{% if page_obj.has_next %}
+    			<a href="?page={{ page_obj.next_page_number }}">next</a>
     		{% endif %}
     	</span>
     </div>
