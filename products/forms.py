@@ -32,16 +32,14 @@ class FilterForm(forms.Form):
 	min_price = forms.IntegerField(required=False)
 	max_price = forms.IntegerField(required=False)
 	geolocation = forms.CharField(max_length=200, required=False)
-
-class ItemsPerPage(forms.Form):
-	items_per_page = forms.ChoiceField(widget=forms.Select(attrs={"onChange": 'paginationForm.submit();'}),
+	items_per_page = forms.ChoiceField(widget=forms.Select(attrs={"onChange": 'filterForm.submit();'}),
 										choices=(
 											('3', 3), 
 											('5', 5), 
 											('10', 10), 
 											('20', 20)
 											),
-										initial=5
+										initial=5, required=False
 										)
 
 
