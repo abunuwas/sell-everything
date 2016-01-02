@@ -11,19 +11,19 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 #from django.template import RequestContext
 
 from .models import Seller, Product
-from .forms import UserForm, SellerForm, LoginForm, ProductForm, FilterForm, ItemsPerPage
+from .forms import UserForm, SellerForm, LoginForm, ProductForm, FilterForm
 
 
 class IndexView(generic.ListView):
 	template_name = 'products/index.html'
 	filter_form = FilterForm
-	pagination_form = ItemsPerPage
-	filter_form_values = ''
-	query_set = ''	
+	paginate_by = 5
+	context_object_name = 'products_list'
 
-	def get_query_set(self, request):
-		print("Estamos en query_set method")
-		request_elements = [value for key, value in request.GET.items() if len(value)>0 and key != 'items_per_page']
+	def get_queryset(self, request):
+		request_elements = [value for key, value in request.GET.items() 
+							if len(value)>0 
+								and key != 'items_per_page']
 		query_set = Product.objects
 		if len(request_elements)>0:
 			filter_form = self.filter_form(request.GET)
@@ -46,62 +46,52 @@ class IndexView(generic.ListView):
 					print(geolocation)
 					query_set = query_set.filter(seller__address=geolocation)
 				else: pass
-				print('Query set: ', query_set)
-				self.query_set = query_set
-				self.filter_form_values = filter_form 
 				return query_set, filter_form
 		else:
 			query_set = query_set.all()
 			filter_form = self.filter_form()
-			self.query_set = query_set
-			self.filter_form_values = filter_form
+			self.queryset = query_set
 			return query_set, filter_form
-		
 
-	def get(self, request, **kwargs):
-		self.get_query_set(request)
-		print('Query set: ', self.query_set)
-
+	def get_pagination(self, request):
 		try:
-			items_per_page = kwargs['items_per_page']
-			pagination_form = kwargs['pagination_form']
+			items_per_page = int(request.GET['items_per_page'])
 		except KeyError:
 			items_per_page = 5
-			pagination_form = self.pagination_form()
+		self.get_pagination=items_per_page
 
-		paginator = Paginator(self.query_set, items_per_page)
-		page = request.GET.get('page') 
-		try:
-			query_set = paginator.page(page)
-		except PageNotAnInteger:
-			query_set = paginator.page(1)
-		except EmptyPage:
-			query_set = paginator.page(paginator.num_pages)	
-		except:
-			print('Something went really worong...')
-			query_set = self.query_set
+	#def listing(self, request, query_set):
+	#	try:
+	#		items_per_page = int(request.GET['items_per_page'])
+	#	except KeyError:
+	#		items_per_page = 5
 
-		return render(request, 'products/index.html', {'products_list': query_set, 
-											    			'user': request.user, 
-												    		'filter_form': self.filter_form,
-												    		'pagination_form': pagination_form}
-												    		)
+	#	paginator = Paginator(query_set, items_per_page)
+	#	page = request.GET.get('page') 
+	#	try:
+	#		paginated_set = paginator.page(page)
+	#	except PageNotAnInteger:
+	#		paginated_set = paginator.page(1)
+	#	except EmptyPage:
+	#		paginated_set = paginator.page(paginator.num_pages)	
+	#	except:
+	#		print('Something went really worong...')
+	#		paginated_set = query_set
 
-
-def listing(request):
-	pagination_form = ItemsPerPage
-	print('Estamos en listing method')
-	try: 
-		items_per_page = request.GET['items_per_page']
-		pagination_form = pagination_form(request.GET)
-	except KeyError:
-		items_per_page = 5
-		pagintion_form = pagination_form()
-	print(items_per_page)
-	return redirect('/products/' + 'show=' + str(items_per_page) + '/', items_per_page=items_per_page, pagination_form=pagination_form)
-
+	#	return paginated_set
 		
 
+	def get(self, request):
+		query_set, filter_form = self.get_query_set(request)
+		#paginated_set = self.listing(request, query_set)
+		print(paginated_set)
+		return render(request, 'products/index.html', {'products_list': paginated_set, 
+											    			'user': request.user, 
+												    		'filter_form': filter_form
+												    		},
+												    		)
+
+		
 
 def filterProducts(request, productFilter):
 	response = "You're at products which belong to the %s category."
