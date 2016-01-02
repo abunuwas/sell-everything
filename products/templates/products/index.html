@@ -4,7 +4,7 @@
 {% endif %}
 
 <p>Filter by</p>
-<form id="filter_form" method="get" action="{% url 'products:index' %}">
+<form name="filterForm" id="filter_form" method="get" action="{% url 'products:index' %}">
 <table>
 	<tr>
 		<td>{{ filter_form.category.label_tag }}</td>
@@ -20,13 +20,10 @@
 	</tr>
 </table>
 <input type="submit" value="submit" />
-</form>
 
-<p>
-	<form name="paginationForm" id="items_page" method="get" action="{% url 'products:listing' %}">
-		 {{ pagination_form }}
-	</form> 
-</p>
+<p>{{ filter_form.items_per_page.label_tag }} {{ filter_form.items_per_page }}</p>
+
+</form> 
 
 {% if products_list %}
     <ul>
@@ -38,11 +35,11 @@
     <div>
     	<span class="step-links">
     		{% if products_list.has_previous %}
-    			<a href="?page={{ contacts.previous_page_number }}">previous</a>
+    			<a href="?page={{ products_list.previous_page_number }}">previous</a>
     		{% endif %}
 
     		<span class="current">
-    			Page {{ products_list.number }} of {{ products_list.num_pages }}
+    			Page {{ products_list.number }} of {{ products_list.paginator.num_pages }}.
     		</span>
 
     		{% if products_list.has_next %}
