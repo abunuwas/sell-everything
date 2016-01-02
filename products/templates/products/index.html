@@ -22,12 +22,34 @@
 <input type="submit" value="submit" />
 </form>
 
+<p>
+	<form name="paginationForm" id="items_page" method="get" action="{% url 'products:listing' %}">
+		 {{ pagination_form }}
+	</form> 
+</p>
+
 {% if products_list %}
     <ul>
         {% for product in products_list %}
             <li><a href="{% url 'products:detailProduct' product.id %}">{{ product.title }}</a></li>
         {% endfor %}
     </ul>
+
+    <div>
+    	<span class="step-links">
+    		{% if products_list.has_previous %}
+    			<a href="?page={{ contacts.previous_page_number }}">previous</a>
+    		{% endif %}
+
+    		<span class="current">
+    			Page {{ products_list.number }} of {{ products_list.num_pages }}
+    		</span>
+
+    		{% if products_list.has_next %}
+    			<a href="?page={{ products_list.next_page_number }}">next</a>
+    		{% endif %}
+    	</span>
+    </div>
 {% else %}
     <p>No products yet available. Would you like to <a href="{% url 'products:logIn' %}">sell</a> something??</p>
 {% endif %}

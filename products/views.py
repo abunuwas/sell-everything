@@ -7,23 +7,23 @@ from django.views import generic
 from django.utils.decorators import method_decorator 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 #from django.template import RequestContext
 
 from .models import Seller, Product
-from .forms import UserForm, SellerForm, LoginForm, ProductForm, FilterForm
+from .forms import UserForm, SellerForm, LoginForm, ProductForm, FilterForm, ItemsPerPage
 
 
 class IndexView(generic.ListView):
 	template_name = 'products/index.html'
-	context_object_name = 'products_list'
 	filter_form = FilterForm
+	pagination_form = ItemsPerPage
+	filter_form_values = ''
+	query_set = ''	
 
-	def get_queryset(self):
-		return Product.objects.order_by('-created')
-
-	def get(self, request):
-		print(request)
-		request_elements = [value for key, value in request.GET.items() if len(value)>0]
+	def get_query_set(self, request):
+		print("Estamos en query_set method")
+		request_elements = [value for key, value in request.GET.items() if len(value)>0 and key != 'items_per_page']
 		query_set = Product.objects
 		if len(request_elements)>0:
 			filter_form = self.filter_form(request.GET)
@@ -46,16 +46,59 @@ class IndexView(generic.ListView):
 					print(geolocation)
 					query_set = query_set.filter(seller__address=geolocation)
 				else: pass
-			print(query_set)
-			return render(request, 'products/index.html', {'products_list': query_set, 
-											    			'user': request.user, 
-												    		'filter_form': filter_form})
+				print('Query set: ', query_set)
+				self.query_set = query_set
+				self.filter_form_values = filter_form 
+				return query_set, filter_form
 		else:
-			filter_form = self.filter_form()
 			query_set = query_set.all()
-			return render(request, 'products/index.html', {'products_list': query_set, 
+			filter_form = self.filter_form()
+			self.query_set = query_set
+			self.filter_form_values = filter_form
+			return query_set, filter_form
+		
+
+	def get(self, request, **kwargs):
+		self.get_query_set(request)
+		print('Query set: ', self.query_set)
+
+		try:
+			items_per_page = kwargs['items_per_page']
+			pagination_form = kwargs['pagination_form']
+		except KeyError:
+			items_per_page = 5
+			pagination_form = self.pagination_form()
+
+		paginator = Paginator(self.query_set, items_per_page)
+		page = request.GET.get('page') 
+		try:
+			query_set = paginator.page(page)
+		except PageNotAnInteger:
+			query_set = paginator.page(1)
+		except EmptyPage:
+			query_set = paginator.page(paginator.num_pages)	
+		except:
+			print('Something went really worong...')
+			query_set = self.query_set
+
+		return render(request, 'products/index.html', {'products_list': query_set, 
 											    			'user': request.user, 
-												    		'filter_form': filter_form})
+												    		'filter_form': self.filter_form,
+												    		'pagination_form': pagination_form}
+												    		)
+
+
+def listing(request):
+	pagination_form = ItemsPerPage
+	print('Estamos en listing method')
+	try: 
+		items_per_page = request.GET['items_per_page']
+		pagination_form = pagination_form(request.GET)
+	except KeyError:
+		items_per_page = 5
+		pagintion_form = pagination_form()
+	print(items_per_page)
+	return redirect('/products/' + 'show=' + str(items_per_page) + '/', items_per_page=items_per_page, pagination_form=pagination_form)
 
 		
 
