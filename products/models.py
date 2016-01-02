@@ -22,7 +22,7 @@ class Product(models.Model):
 	# The following field will be useful in an application with real buyers
 	#purchased_by = models.ForeignKey(User)
 	description = models.TextField(max_length=1000)
-	created = models.DateTimeField('date created')
+	created = models.DateTimeField('date created', auto_now_add=True)
 
 	def __str__(self):
 		return self.title
