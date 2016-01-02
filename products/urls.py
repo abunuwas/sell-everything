@@ -6,8 +6,7 @@ from . import views
 
 app_name = 'products'
 urlpatterns = [
-    url(r'^$', views.listing, name='listing'),
-    url(r'^show=[0-9]+/$', views.IndexView.as_view(), name='index'),
+    url(r'^$', views.IndexView.as_view(), name='index'),
     url(r'^filter/(?P<productFilter>\w+)/$', views.filterProducts, name='filterProducts'),
     url(r'^product/(?P<product_id>[0-9]+)/$', views.DetailProduct.as_view(), name='detailProduct'),
     url(r'^buy/(?P<product_id>[0-9]+)/$', views.buyProduct, name='buyProduct'),
