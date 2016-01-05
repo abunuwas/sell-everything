@@ -1,4 +1,10 @@
 
+{% extends "products/_base.html" %}
+
+{% block content %}
+
+<h1>Sell Everything!</h1>
+
 {% if user.is_active %}
 	<p>{{ user.username }}</p>
 {% endif %}
@@ -53,3 +59,5 @@
 
 <p><a href="{% url 'products:register' %}">Become a Seller!</a></p>
 <p><a href="{% url 'products:logIn' %}">Sell!</a></p>
+
+{% endblock %}
