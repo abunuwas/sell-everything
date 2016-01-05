@@ -1,15 +1,15 @@
 from selenium import webdriver
-from selenium.webdirver.common.keys import Keys
+from selenium.webdriver.common.keys import Keys
 import unittest
 
 class NewVisitorTest(unittest.TestCase):
 
 	def setUp(self): 
-		browser = webdriver.Firefox()
-		self.browswer.implicitly_wait(3)
+		self.browser = webdriver.Firefox()
+		self.browser.implicitly_wait(3)
 
 	def tearDown(self):
-		self.broswer.quit()
+		self.browser.quit()
 
 	def test_can_access_home_page_and_see_products_listed(self):
 		##John has a lot of things he doen't use anymore and wish to sell. 
@@ -19,7 +19,7 @@ class NewVisitorTest(unittest.TestCase):
 
 		##He notices the page title and header mention sell-everything! It looks
 		##like he's found what he needs.
-		self.assertIn('Sell Everytyhing!', self.browswer.title)
+		self.assertIn('Sell Everytyhing!', self.browser.title)
 		header_text = self.browser.find_element_by_tag_name('h1').text
 		self.assertIn('Sell Everything!', header_text)
 
@@ -96,7 +96,7 @@ class NewVisitorTest(unittest.TestCase):
 ##He sorts by category - watches, and finds it!
 
 ##Happy enough, John decides to leave the site for now, so he logs out and closes
-##the browswer.
+##the browser.
 
 if __name__ == '__main__':
 	unittest.main(warnings='ignore')
