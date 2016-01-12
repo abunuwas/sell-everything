@@ -6,7 +6,7 @@ class NewVisitorTest(unittest.TestCase):
 
 	def setUp(self): 
 		self.browser = webdriver.Firefox()
-		self.browser.implicitly_wait(3)
+		self.browser.implicitly_wait(5)
 
 	def tearDown(self):
 		self.browser.quit()
@@ -15,11 +15,11 @@ class NewVisitorTest(unittest.TestCase):
 		##John has a lot of things he doen't use anymore and wish to sell. 
 		##He's heard there's a new website which could serve well his purpose. 
 		##He goes to check out the hompage of that website.
-		browser.get('http://localhost:8000') 
+		self.browser.get('http://localhost:8000') 
 
 		##He notices the page title and header mention sell-everything! It looks
 		##like he's found what he needs.
-		self.assertIn('Sell Everytyhing!', self.browser.title)
+		self.assertIn('Sell Everything!', self.browser.title)
 		header_text = self.browser.find_element_by_tag_name('h1').text
 		self.assertIn('Sell Everything!', header_text)
 
@@ -37,7 +37,7 @@ class NewVisitorTest(unittest.TestCase):
 		##He decides that he wants to upload his own items to the website, in the
 		##hope that he might be able to sell them at a good price. He goes to the
 		##register site.
-		browser.get('http://localhost:8000/accounts/register') 
+		self.browser.get('http://localhost:8000/register') 
 
 		##He finds a registration form that asks him to enter his first name, 
 		##last name, username, address, email, and requests him to confirm 
@@ -99,4 +99,4 @@ class NewVisitorTest(unittest.TestCase):
 ##the browser.
 
 if __name__ == '__main__':
-	unittest.main(warnings='ignore')
+	unittest.main()

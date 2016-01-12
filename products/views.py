@@ -70,9 +70,9 @@ class IndexView(FormMixin, generic.ListView):
 		self.object_list = self.get_queryset()
 		context = self.get_context_data(object_list=self.object_list)
 		context['filter_form'] = self.form
-		print(context)
+		#print(context)
 		return render(request, self.template_name, context)
-		
+
 
 def filterProducts(request, productFilter):
 	response = "You're at products which belong to the %s category."
