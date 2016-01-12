@@ -32,11 +32,13 @@
 </form> 
 
 {% if products_list %}
-    <ul>
-        {% for product in products_list %}
-            <li><a href="{% url 'products:detailProduct' product.id %}">{{ product.title }}</a></li>
+    <table id="id_products_table">
+    	{% for product in products_list %}
+    	<tr>
+    		<td><a href="{% url 'products:detailProduct' product.id %}">{{ product.title }}</a></td>
+    	</tr>
         {% endfor %}
-    </ul>
+    </table><br />
 
     <div>
     	<span class="step-links">
