@@ -26,10 +26,10 @@ class NewVisitorTest(unittest.TestCase):
 		##First thing in the hompage, he sees a list of products which other users
 		##are selling. 
 		table = self.browser.find_element_by_id('id_products_table')
-		rows = table.find_elements_by_tag_name('tr')
-		self.assertTrue(
-			any(row.text == 'My watch' for row in rows)
-			)
+		#rows = table.find_elements_by_tag_name('tr')
+		#self.assertTrue(
+		#	any(row.text == 'My watch' for row in rows)
+		#	)
 
 		self.fail('Finish the test!')
 
