@@ -10,6 +10,9 @@ class UserForm(ModelForm):
 	class Meta:
 		model = User
 		fields = ('first_name', 'last_name', 'username', 'email', 'password',)
+		widgets = {
+			'first_name': forms.fields.TextInput(attrs={'placeholder': 'e.g. John'})
+		}
 
 class SellerForm(ModelForm):
 	class Meta:
