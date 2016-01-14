@@ -13,7 +13,7 @@ class HomePageTest(TestCase):
 
 	def test_home_page_returns_correct_html(self):
 		request = HttpRequest()
-		response = IndexView(request)
+		response = IndexView()
 		
 #		richie = User(first_name='Riche', 
 #					 last_name='Ober', 
